@@ -1,0 +1,118 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile information synchronized on login",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The Firebase Auth UID of the user"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name"
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address if authenticated via Google"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "User verified phone number if authenticated via Phone"
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "Avatar photo URL"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of profile creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of profile update"
+        },
+        "paidCredits": {
+          "type": "number",
+          "description": "Purchased additional name generation credits"
+        },
+        "dailyUsageDate": {
+          "type": "string",
+          "description": "Date string YYYY-MM-DD for tracking 7 daily names"
+        },
+        "dailyUsageCount": {
+          "type": "number",
+          "description": "Number of names generated on dailyUsageDate"
+        },
+        "subscriptionTier": {
+          "type": "string",
+          "description": "Active subscription tier (free, pack, annual)"
+        }
+      },
+      "required": ["userId"]
+    },
+    "SavedName": {
+      "title": "SavedName",
+      "description": "A generated name saved by the authenticated user to their personal collection",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The Firebase Auth UID of the owner"
+        },
+        "fatherName": {
+          "type": "string",
+          "description": "Father's given name"
+        },
+        "motherName": {
+          "type": "string",
+          "description": "Mother's given name"
+        },
+        "suggestedName": {
+          "type": "string",
+          "description": "Confluence name generated"
+        },
+        "genderPref": {
+          "type": "string",
+          "description": "Gender preference (boy, girl, any)"
+        },
+        "stylePref": {
+          "type": "string",
+          "description": "Naming style (classic, modern)"
+        },
+        "planet": {
+          "type": "string",
+          "description": "Guiding planet name"
+        },
+        "planetSanskrit": {
+          "type": "string",
+          "description": "Planet Sanskrit title"
+        },
+        "meaning": {
+          "type": "string",
+          "description": "Meaning and significance of the name"
+        },
+        "nakshatra": {
+          "type": "string",
+          "description": "Associated Vedic nakshatra"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp when the name was saved"
+        }
+      },
+      "required": ["userId", "suggestedName", "fatherName", "motherName"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Stores user profile data where document ID matches the auth UID"
+    },
+    "/users/{userId}/saved_names/{nameId}": {
+      "schema": "SavedName",
+      "description": "Stores saved sacred names belonging to the user"
+    }
+  }
+}

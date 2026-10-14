@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUserProfile(data) {
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100)) &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 150)) &&
+             (!('phoneNumber' in data) || (data.phoneNumber is string && data.phoneNumber.size() <= 30)) &&
+             (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 500)) &&
+             (!('paidCredits' in data) || data.paidCredits is number) &&
+             (!('dailyUsageDate' in data) || (data.dailyUsageDate is string && data.dailyUsageDate.size() <= 20)) &&
+             (!('dailyUsageCount' in data) || data.dailyUsageCount is number) &&
+             (!('subscriptionTier' in data) || (data.subscriptionTier is string && data.subscriptionTier.size() <= 30));
+    }
+
+    function isValidSavedName(data) {
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.suggestedName is string && data.suggestedName.size() <= 120 &&
+             data.fatherName is string && data.fatherName.size() <= 100 &&
+             data.motherName is string && data.motherName.size() <= 100 &&
+             (!('meaning' in data) || (data.meaning is string && data.meaning.size() <= 600)) &&
+             (!('planet' in data) || (data.planet is string && data.planet.size() <= 100)) &&
+             (!('planetSanskrit' in data) || (data.planetSanskrit is string && data.planetSanskrit.size() <= 100)) &&
+             (!('nakshatra' in data) || (data.nakshatra is string && data.nakshatra.size() <= 100));
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      allow list: if false;
+      allow create, update: if isSignedIn() && request.auth.uid == userId && isValidUserProfile(incoming());
+      allow delete: if false;
+
+      match /saved_names/{nameId} {
+        allow get, list: if isSignedIn() && request.auth.uid == userId;
+        allow create: if isSignedIn() && request.auth.uid == userId && isValidSavedName(incoming());
+        allow update: if isSignedIn() && request.auth.uid == userId && isValidSavedName(incoming());
+        allow delete: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+  }
+}
